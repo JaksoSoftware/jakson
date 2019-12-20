@@ -1,0 +1,43 @@
+{
+  "name": "jakson",
+  "version": "0.1.2",
+  "description": "typescript server boilerplate",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "mocha --timeout 600000 -r ts-node/register tests/**/*-test.ts",
+    "clean": "rm -rf lib",
+    "build": "npm run clean && tsc",
+    "prepare": "npm run build",
+    "prettier": "prettier --write 'src/**/*.ts' 'tests/**/*.ts'"
+  },
+  "author": "Jakso Software Oy",
+  "license": "MIT",
+  "files": [
+    "lib/*"
+  ],
+  "bin": {
+    "jakson": "lib/cli.js"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.7",
+    "@types/koa": "^2.11.0",
+    "@types/koa-bodyparser": "^4.3.0",
+    "@types/koa-router": "^7.0.42",
+    "@types/mocha": "^5.2.7",
+    "@types/nanoid": "^2.1.0",
+    "axios": "^0.19.0",
+    "chai": "^4.2.0",
+    "mocha": "^6.2.2",
+    "prettier": "^1.19.1",
+    "ts-node": "^8.5.4",
+    "typescript": "^3.7.4"
+  },
+  "dependencies": {
+    "ajv": "^6.10.2",
+    "commander": "^4.0.1",
+    "koa": "^2.11.0",
+    "koa-bodyparser": "^4.2.1",
+    "koa-router": "^7.4.0",
+    "nanoid": "^2.1.8"
+  }
+}
