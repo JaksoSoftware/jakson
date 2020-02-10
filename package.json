@@ -9,8 +9,7 @@
     "build": "npm run clean && tsc",
     "prepare": "npm run build",
     "eslint": "eslint --ext .ts src/ tests/",
-    "eslint:fix": "eslint --fix --ext .ts src/ tests/",
-    "prettier": "prettier --write 'src/**/*.ts' 'tests/**/*.ts'"
+    "eslint:fix": "eslint --fix --ext .ts src/ tests/"
   },
   "author": "Jakso Software Oy",
   "license": "MIT",
