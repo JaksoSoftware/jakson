@@ -1,7 +1,6 @@
 import Koa from 'koa'
 import http from 'http'
 import Router from 'koa-router'
-import nanoid from 'nanoid'
 import bodyParser from 'koa-bodyparser'
 
 import { Server } from 'net'
@@ -55,9 +54,13 @@ export abstract class Application<TServiceFactories, TConfig extends Config> {
     await this.stopServiceFactories()
   }
 
-  async createServiceInstances(type: string, koaCtx?: Koa.Context): Promise<GetServicesType<this>> {
+  async createServiceInstances(
+    type: string,
+    uid: string,
+    koaCtx?: Koa.Context
+  ): Promise<GetServicesType<this>> {
     const services: any = {}
-    const serviceContext = await this.createServiceContext(type, services, koaCtx)
+    const serviceContext = await this.createServiceContext(type, uid, services, koaCtx)
 
     return await this.createServiceInstancesForContext(serviceContext, services)
   }
@@ -98,10 +101,6 @@ export abstract class Application<TServiceFactories, TConfig extends Config> {
 
   abstract async createServiceFactories(): Promise<TServiceFactories>
   abstract async registerRoutes(router: Router): Promise<void>
-
-  log(message: string, data?: object): void {
-    console.log(message, data)
-  }
 
   protected async createKoa(): Promise<Koa> {
     const koa = new Koa()
@@ -169,6 +168,7 @@ export abstract class Application<TServiceFactories, TConfig extends Config> {
 
   protected async createServiceContext(
     type: string,
+    uid: string,
     services: GetServicesType<this>,
     koaCtx?: Koa.Context
   ): Promise<ServiceContext<this>> {
@@ -177,7 +177,7 @@ export abstract class Application<TServiceFactories, TConfig extends Config> {
     return {
       app: this,
       services,
-      uid: nanoid(8),
+      uid,
       type
     }
   }
