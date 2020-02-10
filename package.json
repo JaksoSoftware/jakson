@@ -8,6 +8,8 @@
     "clean": "rm -rf lib",
     "build": "npm run clean && tsc",
     "prepare": "npm run build",
+    "eslint": "eslint --ext .ts src/ tests/",
+    "eslint:fix": "eslint --fix --ext .ts src/ tests/",
     "prettier": "prettier --write 'src/**/*.ts' 'tests/**/*.ts'"
   },
   "author": "Jakso Software Oy",
