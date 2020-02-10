@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 
-import program, { CommanderStatic, Option } from 'commander'
+import program, { CommanderStatic } from 'commander'
 import { execSync } from 'child_process'
-import path from 'path'
 import fs from 'fs'
 
 interface Options {
@@ -11,7 +10,7 @@ interface Options {
   database?: string
 }
 
-function main() {
+function main(): void {
   program
     .option('-n, --name <name>', 'name of the project')
     .option('-a, --author <author>', 'author of the project')
@@ -385,6 +384,7 @@ function createApp(options: Options): string {
 }
 
 function createTestSession(options: Options): string {
+  void options
   return `
     import { App } from '../src/app'
 
@@ -559,7 +559,7 @@ function createKnexFile(options: Options): string {
   `
 }
 
-function createKnexFileTypings() {
+function createKnexFileTypings(): string {
   return `
     import Knex from 'knex'
 
@@ -571,7 +571,7 @@ function createKnexFileTypings() {
   `
 }
 
-function createDockerComposeFile(options: Options) {
+function createDockerComposeFile(options: Options): string {
   const name = options.name.replace(/_/g, '-')
 
   return `
@@ -586,7 +586,7 @@ function createDockerComposeFile(options: Options) {
   `
 }
 
-function createPrettierRc() {
+function createPrettierRc(): string {
   const prettierRc = {
     printWidth: 100,
     semi: false,

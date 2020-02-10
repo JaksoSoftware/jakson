@@ -59,7 +59,7 @@ describe('smoke tests', () => {
     fetch: FetchServiceFactory
   }
 
-  interface TestConfig extends Config {}
+  type TestConfig = Config
 
   interface GetUserInput {
     id: number
@@ -134,7 +134,7 @@ describe('smoke tests', () => {
   }
 
   let app: App
-  let config: Config = {
+  const config: Config = {
     type: 'test',
     port: 3000
   }

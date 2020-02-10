@@ -29,7 +29,7 @@ export type JSONSchemaType = JSONSchemaArray[] | boolean | number | null | objec
 
 // Workaround for infinite type recursion
 // https://github.com/Microsoft/TypeScript/issues/3496#issuecomment-128553540
-export interface JSONSchemaArray extends Array<JSONSchemaType> {}
+export type JSONSchemaArray = Array<JSONSchemaType>
 
 /**
  * Meta schema

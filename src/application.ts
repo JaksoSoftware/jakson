@@ -15,7 +15,7 @@ export abstract class Application<TServiceFactories, TConfig extends Config> {
   TServices!: GetServicesTypeForFactoriesType<TServiceFactories>
 
   config: TConfig
-  private router: Router
+  private readonly router: Router
 
   // These exist after the async configure phase but not yet
   // in the constructor.
@@ -30,7 +30,7 @@ export abstract class Application<TServiceFactories, TConfig extends Config> {
     this.router = new Router()
   }
 
-  async configure() {
+  async configure(): Promise<void> {
     this.serviceFactories = await this.createServiceFactories()
     await this.typeCheckServiceFactories()
 
@@ -38,7 +38,7 @@ export abstract class Application<TServiceFactories, TConfig extends Config> {
     this.koa = await this.createKoa()
   }
 
-  async start() {
+  async start(): Promise<void> {
     if (!this.serviceFactories) {
       throw new Error('run `await app.configure()` before `await app.start()`')
     }
@@ -47,7 +47,7 @@ export abstract class Application<TServiceFactories, TConfig extends Config> {
     this.server = await this.startServer(this.koa)
   }
 
-  async stop() {
+  async stop(): Promise<void> {
     if (this.server) {
       await this.stopServer(this.server)
     }
@@ -87,7 +87,7 @@ export abstract class Application<TServiceFactories, TConfig extends Config> {
   async forEachService(
     services: GetServicesType<this>,
     callback: (name: keyof GetServicesType<this>, service: Service<this>) => Promise<void>
-  ) {
+  ): Promise<void> {
     for (const [name, service] of Object.entries(services) as [
       keyof GetServicesType<this>,
       Service<this>
@@ -121,14 +121,17 @@ export abstract class Application<TServiceFactories, TConfig extends Config> {
   }
 
   protected async beforeKoaConfigured(koa: Koa): Promise<void> {
+    void koa
     // Do nothing by default.
   }
 
   protected async afterKoaBodyParserAdded(koa: Koa): Promise<void> {
+    void koa
     // Do nothing by default.
   }
 
   protected async afterKoaConfigured(koa: Koa): Promise<void> {
+    void koa
     // Do nothing by default.
   }
 
@@ -142,7 +145,7 @@ export abstract class Application<TServiceFactories, TConfig extends Config> {
     await new Promise(resolve => server.close(resolve))
   }
 
-  private async typeCheckServiceFactories() {
+  private async typeCheckServiceFactories(): Promise<void> {
     // There doesn't seem to be an easy way to force the TServiceFactories
     // interface values to have type ServiceFactory<this, any> while making
     // the GetServicesTypeForFactoriesType magic possible. Instead, we have
