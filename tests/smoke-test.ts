@@ -38,6 +38,8 @@ describe('smoke tests', () => {
 
   class FetchService extends Service<App> {
     async fetchUser(userId: number): Promise<User> {
+      this.log(`fetching user ${userId}`)
+
       // Simulate some kind of async fetch from somewhere.
       await new Promise(resolve => setTimeout(resolve, 100))
 

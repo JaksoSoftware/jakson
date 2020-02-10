@@ -1,6 +1,7 @@
 import { Application } from './application'
 import { GetServicesType } from './utils'
 import { Config } from './config'
+import { createLogger, LogData } from './logger'
 
 export interface ServiceContext<TApplication extends Application<any, Config>> {
   app: TApplication
@@ -34,5 +35,9 @@ export class Service<TApplication extends Application<any, Config>> {
    */
   async stop(): Promise<void> {
     // Do nothing by default.
+  }
+
+  protected log(message: string, data?: LogData): void {
+    return createLogger(`${this.instanceId} service:${this.constructor.name}`)(message, data)
   }
 }

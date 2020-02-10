@@ -8,6 +8,8 @@ import { UnauthorizedError } from './errors/unauthorized-error'
 import { ConflictError } from './errors/conflict-error'
 import { GetServicesType, Constructor } from './utils'
 import { JSONSchema } from './json-schema'
+import { createLogger, LogData } from './logger'
+import nanoid from 'nanoid'
 
 export interface Result {
   status: number
@@ -48,10 +50,12 @@ export abstract class Action<TApplication extends Application<any, any>, InputTy
 
   protected app: TApplication
   protected services: GetServicesType<TApplication>
+  protected requestUid: string
 
-  constructor(app: TApplication, services: GetServicesType<TApplication>) {
+  constructor(app: TApplication, services: GetServicesType<TApplication>, requestUid: string) {
     this.app = app
     this.services = services
+    this.requestUid = requestUid
     this.ensureValidatorsCreated()
   }
 
@@ -63,8 +67,9 @@ export abstract class Action<TApplication extends Application<any, any>, InputTy
     TApplication extends Application<any, any>
   >(this: Constructor<TAction>, app: TApplication): RouteHandler {
     return async (ctx: Context): Promise<void> => {
-      const services = await app.createServiceInstances('action', ctx)
-      const action = new this(app, services)
+      const requestUid = nanoid(8)
+      const services = await app.createServiceInstances('action', requestUid, ctx)
+      const action = new this(app, services, requestUid)
       await action.run(ctx)
     }
   }
@@ -124,8 +129,9 @@ export abstract class Action<TApplication extends Application<any, any>, InputTy
     return result
   }
 
-  protected log(message: string, data?: object): void {
-    this.app.log(message, data)
+  protected log(message: string, data?: LogData): void {
+    const logger = createLogger(`${this.requestUid} action:${this.constructor.name}`)
+    logger(message, data)
   }
 
   protected async beforeHandle(input: InputType): Promise<InputType> {
