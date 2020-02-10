@@ -8,7 +8,14 @@
     "clean": "rm -rf lib",
     "build": "npm run clean && tsc",
     "prepare": "npm run build",
-    "prettier": "prettier --write 'src/**/*.ts' 'tests/**/*.ts'"
+    "eslint": "eslint --ext .ts src/ tests/",
+    "eslint:fix": "eslint --fix --ext .ts src/ tests/"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "tsc --noEmit && npm run eslint"
+    }
   },
   "author": "Jakso Software Oy",
   "license": "MIT",
@@ -25,8 +32,15 @@
     "@types/koa-router": "^7.0.42",
     "@types/mocha": "^5.2.7",
     "@types/nanoid": "^2.1.0",
+    "@typescript-eslint/eslint-plugin": "^2.19.0",
+    "@typescript-eslint/parser": "^2.19.0",
     "axios": "^0.19.0",
     "chai": "^4.2.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "husky": "^4.2.1",
+    "lint-staged": "^10.0.7",
     "mocha": "^6.2.2",
     "prettier": "^1.19.1",
     "ts-node": "^8.5.4",

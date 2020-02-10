@@ -124,7 +124,7 @@ export abstract class Action<TApplication extends Application<any, any>, InputTy
     return result
   }
 
-  protected log(message: string, data?: object) {
+  protected log(message: string, data?: object): void {
     this.app.log(message, data)
   }
 
@@ -280,7 +280,7 @@ export abstract class Action<TApplication extends Application<any, any>, InputTy
 
 abstract class ValidatorBase {
   protected static ajv: Ajv.Ajv
-  private validator: Ajv.ValidateFunction
+  private readonly validator: Ajv.ValidateFunction
 
   constructor(schema: JSONSchema) {
     if (!this.ctor.ajv) {

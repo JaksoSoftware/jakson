@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 
-import program, { CommanderStatic, Option } from 'commander'
+import program, { CommanderStatic } from 'commander'
 import { execSync } from 'child_process'
-import path from 'path'
 import fs from 'fs'
 
 interface Options {
@@ -11,7 +10,7 @@ interface Options {
   database?: string
 }
 
-function main() {
+function main(): void {
   program
     .option('-n, --name <name>', 'name of the project')
     .option('-a, --author <author>', 'author of the project')
@@ -43,7 +42,10 @@ function main() {
   for (const { file, create } of [
     { file: 'package.json', create: createPackageJson },
     { file: 'tsconfig.json', create: createTsConfigJson },
+    { file: 'tsconfig-eslint.json', create: createTsConfigEslintJson },
+    { file: '.eslintrc.js', create: createEslintRc },
     { file: '.prettierrc.json', create: createPrettierRc },
+    { file: '.lintstagedrc.js', create: createLintStagedRc },
     { file: '.gitignore', create: createGitIgnore },
     { file: 'src/config.ts', create: createConfig },
     { file: 'src/configs/development.ts', create: createDevelopmentConfig },
@@ -76,8 +78,8 @@ function main() {
   console.log('running npm install')
   execSync('npm install')
 
-  console.log('running npm run prettier')
-  execSync('npm run prettier')
+  console.log('running prettier')
+  execSync("npx prettier --write '**/*.{ts,js,json}'")
 }
 
 function readOptions(program: CommanderStatic): Options {
@@ -114,7 +116,8 @@ function createPackageJson(options: Options): string {
       test: 'mocha --timeout 600000 -r ts-node/register tests/**/*-test.ts',
       clean: 'rm -rf lib',
       build: 'npm run clean && tsc',
-      prettier: "prettier --write '**/*.{ts,js,json}'"
+      eslint: 'eslint --ext .ts src/ tests/',
+      'eslint:fix': 'eslint --fix --ext .ts src/ tests/'
     },
 
     author: options.author || 'Unknown',
@@ -126,8 +129,14 @@ function createPackageJson(options: Options): string {
       '@types/mocha': '^5.2.7',
       '@types/koa': '^2.11.0',
       '@types/koa-router': '^7.0.42',
+      '@typescript-eslint/eslint-plugin': '^2.19.0',
+      '@typescript-eslint/parser': '^2.19.0',
       axios: '^0.19.0',
       chai: '^4.2.0',
+      eslint: '^6.8.0',
+      'eslint-config-prettier': '^6.10.0',
+      'eslint-plugin-prettier': '^3.1.2',
+      'lint-staged': '^10.0.7',
       mocha: '^6.2.2',
       prettier: '^1.19.1',
       'ts-node': '^8.5.4',
@@ -150,28 +159,38 @@ function createPackageJson(options: Options): string {
   return jsonToFile(packageJson)
 }
 
+const baseTsConfig = {
+  compilerOptions: {
+    target: 'ESNext',
+    module: 'commonjs',
+    declaration: true,
+    outDir: 'lib',
+    strict: true,
+    esModuleInterop: true,
+    noImplicitAny: true
+  }
+}
+
 function createTsConfigJson(): string {
   const tsConfig = {
-    compilerOptions: {
-      target: 'ESNext',
-      module: 'commonjs',
-      declaration: true,
-      outDir: 'lib',
-      strict: true,
-      esModuleInterop: true,
-      noImplicitAny: true
-    },
+    ...baseTsConfig,
     include: ['src/']
   }
 
   return jsonToFile(tsConfig)
 }
 
+function createTsConfigEslintJson(): string {
+  return jsonToFile(baseTsConfig)
+}
+
 function createGitIgnore(): string {
   return `
-    node_modules
-    .vscode
-    lib
+    /node_modules
+    /.vscode
+    /lib
+    *.iml
+    /.idea
   `
 }
 
@@ -385,6 +404,7 @@ function createApp(options: Options): string {
 }
 
 function createTestSession(options: Options): string {
+  void options
   return `
     import { App } from '../src/app'
 
@@ -559,7 +579,7 @@ function createKnexFile(options: Options): string {
   `
 }
 
-function createKnexFileTypings() {
+function createKnexFileTypings(): string {
   return `
     import Knex from 'knex'
 
@@ -571,7 +591,7 @@ function createKnexFileTypings() {
   `
 }
 
-function createDockerComposeFile(options: Options) {
+function createDockerComposeFile(options: Options): string {
   const name = options.name.replace(/_/g, '-')
 
   return `
@@ -586,7 +606,46 @@ function createDockerComposeFile(options: Options) {
   `
 }
 
-function createPrettierRc() {
+function createEslintRc(): string {
+  return `
+    module.exports = {
+      parser: '@typescript-eslint/parser',  // Specifies the ESLint parser
+      extends: [
+        'plugin:@typescript-eslint/recommended',  // Uses the recommended rules from the @typescript-eslint/eslint-plugin
+        'prettier/@typescript-eslint',  // Uses eslint-config-prettier to disable ESLint rules from @typescript-eslint/eslint-plugin that would conflict with prettier
+        'plugin:prettier/recommended',  // Enables eslint-plugin-prettier and displays prettier errors as ESLint errors. Make sure this is always the last configuration in the extends array.
+      ],
+      parserOptions: {
+        ecmaVersion: 2018,  // Allows for the parsing of modern ECMAScript features
+        sourceType: 'module',  // Allows for the use of imports,
+        project: ['tsconfig-eslint.json'],
+        noWatch: true
+      },
+      rules: {
+        // Place to specify ESLint rules. Can be used to overwrite rules specified from the extended configs
+        // e.g. "@typescript-eslint/explicit-function-return-type": "off",
+        '@typescript-eslint/member-delimiter-style': [
+          'error', {
+            multiline: {
+              delimiter: 'none'
+            }
+          }
+        ],
+        '@typescript-eslint/camelcase': [
+          'error', {
+            properties: 'never'
+          }
+        ],
+        '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/no-use-before-define': ["error", { "functions": false, "classes": false }],
+        '@typescript-eslint/no-non-null-assertion': 'off',
+        '@typescript-eslint/prefer-readonly': 'warn'
+      }
+    }
+  `
+}
+
+function createPrettierRc(): string {
   const prettierRc = {
     printWidth: 100,
     semi: false,
@@ -594,6 +653,17 @@ function createPrettierRc() {
   }
 
   return jsonToFile(prettierRc)
+}
+
+function createLintStagedRc(): string {
+  return `
+    module.exports = {
+      '**/*.ts': [
+        () => 'tsc --noEmit',
+        'eslint --max-warnings=0'
+      ]
+    }
+  `
 }
 
 function jsonToFile(value: any): string {
