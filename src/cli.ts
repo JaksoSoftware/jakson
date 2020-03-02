@@ -2,6 +2,7 @@
 
 import program, { CommanderStatic } from 'commander'
 import { execSync } from 'child_process'
+import { removeLeadingWhitespace } from './utils'
 import fs from 'fs'
 
 interface Options {
@@ -185,13 +186,13 @@ function createTsConfigEslintJson(): string {
 }
 
 function createGitIgnore(): string {
-  return `
-    /node_modules
-    /.vscode
-    /lib
+  return removeLeadingWhitespace(`
+    node_modules/
+    .vscode/
+    lib/
     *.iml
-    /.idea
-  `
+    .idea/
+  `)
 }
 
 function createConfig(options: Options): string {
@@ -288,7 +289,7 @@ function createProductionConfig(options: Options): string {
 
     const config: Config = {
       ...devConfig,
-      
+
       type: 'production',
       port: 3004
       ${options.database && ',db: { knex }'}
@@ -304,8 +305,8 @@ function createAction(): string {
     import { App } from './app'
 
     export abstract class Action<InputType, OutputType> extends ActionBase<
-      App, 
-      InputType, 
+      App,
+      InputType,
       OutputType
     > {
 
@@ -395,7 +396,7 @@ function createApp(options: Options): string {
           health: new HealthServiceFactory(this)
         }
       }
-  
+
       async registerRoutes(router: Router): Promise<void> {
         router.get('/health', GetHealthAction.createHandler(this))
       }
@@ -410,12 +411,12 @@ function createTestSession(options: Options): string {
 
     import axios from 'axios'
     import testConfig from '../src/configs/test'
-    
+
     export const app = new App(testConfig)
-    
+
     export const request = axios.create({
       baseURL: \`http://localhost:\${testConfig.port}/\`,
-    
+
       validateStatus() {
         return true
       }
@@ -430,7 +431,7 @@ function createTestSession(options: Options): string {
         await factory.testSession.beforeStartApp()
       })
     })
-    
+
     before(async () => {
       await app.start()
     })
@@ -440,7 +441,7 @@ function createTestSession(options: Options): string {
         await factory.testSession.afterStartApp()
       })
     })
-    
+
     beforeEach(async () => {
       await app.forEachServiceFactory(async (_, factory) => {
         await factory.testSession.beforeEachTest()
@@ -458,7 +459,7 @@ function createTestSession(options: Options): string {
         await factory.testSession.beforeStopApp()
       })
     })
-    
+
     after(async () => {
       await app.stop()
     })

@@ -21,3 +21,10 @@ export type GetServicesType<T extends Application<any, any>> = T['TServices']
 export type GetServicesTypeForFactoriesType<T> = {
   [K in keyof T]: T[K] extends ServiceFactory<any, any> ? T[K]['TService'] : never
 }
+
+/**
+ * Strip whitespace from the beginning of each line
+ */
+export function removeLeadingWhitespace(input: string): string {
+  return input.replace(/^[^\S\n]+/gm, '')
+}
