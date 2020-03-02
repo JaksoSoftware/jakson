@@ -198,10 +198,10 @@ function createGitIgnore(): string {
 function createConfig(options: Options): string {
   return `
     import { Config as ConfigBase } from 'jakson'
-    ${options.database && "import { PostgresServiceConfig } from 'jakson-postgres'"}
+    ${options.database && "import { PostgresServiceConfig } from 'jakson-postgres'"}
 
     export interface Config extends ConfigBase {
-      ${options.database && 'db:  PostgresServiceConfig'}
+      ${options.database && 'db:  PostgresServiceConfig'}
     }
   `
 }
@@ -210,13 +210,13 @@ function createDevelopmentConfig(options: Options): string {
   return `
     require('dotenv').config()
 
-    import { Config } from '../config'
-    ${options.database && "import { development as knex } from '../../knexfile'"}
+    import { Config } from '../config'
+    ${options.database && "import { development as knex } from '../../knexfile'"}
 
     const config: Config = {
       type: 'development',
       port: 3000
-      ${options.database && ',db: { knex }'}
+      ${options.database && ',db: { knex }'}
     }
 
     export default config
@@ -227,15 +227,15 @@ function createTestConfig(options: Options): string {
   return `
     import devConfig from './development'
 
-    import { Config } from '../config'
-    ${options.database && "import { test as knex } from '../../knexfile'"}
+    import { Config } from '../config'
+    ${options.database && "import { test as knex } from '../../knexfile'"}
 
     const config: Config = {
       ...devConfig,
 
       type: 'test',
       port: 3001
-      ${options.database && ',db: { knex }'}
+      ${options.database && ',db: { knex }'}
     }
 
     export default config
@@ -246,15 +246,15 @@ function createIntegrationTestConfig(options: Options): string {
   return `
     import devConfig from './development'
 
-    import { Config } from '../config'
-    ${options.database && "import { integration_test as knex } from '../../knexfile'"}
+    import { Config } from '../config'
+    ${options.database && "import { integration_test as knex } from '../../knexfile'"}
 
     const config: Config = {
       ...devConfig,
 
       type: 'integration-test',
       port: 3002
-      ${options.database && ',db: { knex }'}
+      ${options.database && ',db: { knex }'}
     }
 
     export default config
@@ -265,15 +265,15 @@ function createStagingConfig(options: Options): string {
   return `
     import devConfig from './development'
 
-    import { Config } from '../config'
-    ${options.database && "import { staging as knex } from '../../knexfile'"}
+    import { Config } from '../config'
+    ${options.database && "import { staging as knex } from '../../knexfile'"}
 
     const config: Config = {
       ...devConfig,
 
       type: 'staging',
       port: 3003
-      ${options.database && ',db: { knex }'}
+      ${options.database && ',db: { knex }'}
     }
 
     export default config
@@ -284,15 +284,15 @@ function createProductionConfig(options: Options): string {
   return `
     import devConfig from './development'
 
-    import { Config } from '../config'
-    ${options.database && "import { production as knex } from '../../knexfile'"}
+    import { Config } from '../config'
+    ${options.database && "import { production as knex } from '../../knexfile'"}
 
     const config: Config = {
       ...devConfig,
 
       type: 'production',
       port: 3004
-      ${options.database && ',db: { knex }'}
+      ${options.database && ',db: { knex }'}
     }
 
     export default config
@@ -302,7 +302,7 @@ function createProductionConfig(options: Options): string {
 function createAction(): string {
   return `
     import { Action as ActionBase } from 'jakson'
-    import { App } from './app'
+    import { App } from './app'
 
     export abstract class Action<InputType, OutputType> extends ActionBase<
       App,
@@ -329,7 +329,7 @@ function createHealthService(options: Options): string {
 
   return `
     import { Service } from 'jakson'
-    import { App } from '../../app'
+    import { App } from '../../app'
 
     export class HealthService extends Service<App> {
       async getHealth(): Promise<boolean> {
@@ -342,8 +342,8 @@ function createHealthService(options: Options): string {
 function createHealthServiceFactory(): string {
   return `
     import { ServiceFactory, ServiceContext } from 'jakson'
-    import { HealthService } from './health-service'
-    import { App } from '../../app'
+    import { HealthService } from './health-service'
+    import { App } from '../../app'
 
     export class HealthServiceFactory extends ServiceFactory<App, HealthService> {
       async createService(ctx: ServiceContext<App>): Promise<HealthService> {
@@ -377,11 +377,11 @@ function createApp(options: Options): string {
   return `
     import Router from 'koa-router'
 
-    import { Application } from 'jakson'
-    import { Config } from './config'
+    import { Application } from 'jakson'
+    import { Config } from './config'
 
     import { GetHealthAction } from './actions/health/get-health-action'
-    import { HealthServiceFactory } from './services/health/health-service-factory'
+    import { HealthServiceFactory } from './services/health/health-service-factory'
     ${options.database && "import { DbServiceFactory } from './services/db/db-service-factory'"}
 
     interface ServiceFactories {
@@ -474,7 +474,7 @@ function createTestSession(options: Options): string {
 
 function createGetHealthTest(): string {
   return `
-    import { expect } from 'chai'
+    import { expect } from 'chai'
     import { request } from '../test-session'
 
     describe('GET /health', () => {
@@ -482,7 +482,7 @@ function createGetHealthTest(): string {
         const res = await request.get('/health')
 
         expect(res.status).to.equal(200)
-        expect(res.data).to.eql({ isHealthy: true })
+        expect(res.data).to.eql({ isHealthy: true })
       })
     })
   `
@@ -491,9 +491,9 @@ function createGetHealthTest(): string {
 function createDbServiceFactory(): string {
   return `
     import { App } from '../../app'
-    import { PostgresServiceFactory, PostgresServiceConfig } from 'jakson-postgres'
+    import { PostgresServiceFactory, PostgresServiceConfig } from 'jakson-postgres'
 
-    export class DbServiceFactory extends  PostgresServiceFactory<App> {
+    export class DbServiceFactory extends  PostgresServiceFactory<App> {
       get config(): PostgresServiceConfig {
         return this.app.config.db
       }
@@ -510,9 +510,9 @@ function createKnexFile(options: Options): string {
     const { env } = process
 
     const connection = {
-      host: env.POSTGRES_HOST || 'localhost',
-      port: env.POSTGRES_PORT || 5432,
-      user: env.POSTGRES_USER || 'postgres',
+      host: env.POSTGRES_HOST || 'localhost',
+      port: env.POSTGRES_PORT || 5432,
+      user: env.POSTGRES_USER || 'postgres',
       password: env.POSTGRES_PASSWORD || '',
     }
 
